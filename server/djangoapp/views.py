@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from datetime import datetime
 import logging
@@ -27,16 +28,39 @@ def contact(request):
     return render(request, 'djangoapp/contact.html')
 
 # Create a `login_request` view to handle sign in request
-# def login_request(request):
-# ...
+def login_request(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('/djangoapp/')  # Redirect to the home page
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'index.html', {'form': form})
 
-# Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
+def logout_request(request):
+    logout(request)
+
+    return redirect('/djangoapp/')
 
 # Create a `registration_request` view to handle sign up request
-# def registration_request(request):
-# ...
+def registration_request(request):
+    if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        username = request.POST['username']
+        password = request.POST['password']
+        user = User.objects.create_user(username=username, password=password, first_name=first_name, last_name=last_name)
+        user.save()
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('/djangoapp/')
+    return render(request, 'djangoapp/registration.html')
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):

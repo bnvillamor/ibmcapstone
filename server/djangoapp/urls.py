@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.auth.views import LogoutView
 from . import views
 
 app_name = 'djangoapp'
@@ -14,11 +15,11 @@ urlpatterns = [
 
     path('contact/', views.contact, name='contact'),
 
-    # path for registration
+    path('registration/', views.registration_request, name='registration'),
 
-    # path for login
+    path('login/', views.login_request, name='login'),
 
-    # path for logout
+    path('logout/', views.logout_request, name='logout'),
 
     path(route='', view=views.get_dealerships, name='index'),
 
