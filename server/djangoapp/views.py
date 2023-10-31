@@ -3,13 +3,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-# from .restapis import related methods
+from .restapis import get_dealers_from_cf, get_dealer_reviews_from_cf, analyze_review_sentiments
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+from .models import CarModel
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -64,14 +65,35 @@ def registration_request(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
-    context = {}
     if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/ac844fdd-a8a1-4ac3-9754-64c371ab61d1/dealership-package/getalldealerships"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 # def get_dealer_details(request, dealer_id):
 # ...
+def get_dealer_details(request, dealer_id):
+    car_models = CarModel.TYPE_CHOICES
+    # Assuming all CarModels for the dealer have the same dealer name
+    if car_models:
+        dealer_name = car_models[0]
+    else:
+        dealer_name = "Dealer Name Not Found"  # You can customize this message
+
+    reviews = get_dealer_reviews_from_cf(dealer_id)
+
+    context = {
+        'dealer_name': dealer_name,
+        'reviews': reviews,
+    }
+
+    return render(request, 'your_template.html', context)
 
 # Create a `add_review` view to submit a review
 # def add_review(request, dealer_id):
