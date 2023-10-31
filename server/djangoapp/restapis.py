@@ -51,7 +51,7 @@ def get_dealers_from_cf(url, **kwargs):
 # - Parse JSON results into a DealerView object list
 def get_dealer_reviews_from_cf(dealer_id):
     cloud_function_url = 'https://us-south.functions.appdomain.cloud/api/v1/web/ac844fdd-a8a1-4ac3-9754-64c371ab61d1/dealership-package/getdealershipsbystate'
-
+    api_key = None
     # Define the parameters to send with the GET request
     params = {'dealerId': dealer_id}
 

@@ -1,36 +1,48 @@
 name: 'Lint Code'
 
-on:
+on: 
   push:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  workflow_dispatch: # Enable manual triggering
+    inputs:
+      lint_function_js: # Add inputs for specific jobs
+        description: 'Lint JavaScript Function'
+        required: false
+        default: false
+      lint_function_python:
+        description: 'Lint Python Function'
+        required: false
+        default: false
+      lint_django_server:
+        description: 'Lint Django Server'
+        required: false
+        default: false
 
 jobs: # list of things to do
   lint_function_js:
     name: Linting JavaScript Function 
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
+    if: github.event.inputs.lint_function_js == 'true' # Run job if the input is 'true'
     steps: # list of steps
       - name: Install NodeJS
         uses: actions/setup-node@v3
         with:
           node-version: 16
-
       - name: Code Checkout
         uses: actions/checkout@v3
-
       - name: Install Dependencies
         run: npm install
         working-directory: functions/sample/nodejs
-
       - name: Code Linting
         run: npm run lint
         working-directory: functions/sample/nodejs
     
-
   lint_function_python:
     name: Linting Python Function 
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
+    if: github.event.inputs.lint_function_python == 'true' # Run job if the input is 'true'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.7
@@ -49,6 +61,7 @@ jobs: # list of things to do
   lint_django_server:
     name: Linting Django Server 
     runs-on: ubuntu-latest
+    if: github.event.inputs.lint_django_server == 'true' # Run job if the input is 'true'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.7
